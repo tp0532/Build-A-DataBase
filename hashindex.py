@@ -23,3 +23,8 @@ class HashIndex:
             if entry[0] == key:
                 return bucket, i
         return bucket, -1
+
+    def get(self, key, default=None):
+        bucket, i = self._find(key)
+        return bucket[i][1] if i >= 0 else default
+
