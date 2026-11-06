@@ -16,3 +16,10 @@ class HashIndex:
 
     def __len__(self):
         return self._size
+    def _find(self, key):
+        """Return (bucket, position) where position is -1 if absent."""
+        bucket = self._buckets[_hash(key) % len(self._buckets)]
+        for i, entry in enumerate(bucket):
+            if entry[0] == key:
+                return bucket, i
+        return bucket, -1
