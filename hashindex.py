@@ -10,3 +10,9 @@ def _hash(key):
     return h
     
 class HashIndex:
+    def __init__(self):
+        self._buckets = [[] for _ in range(_INITIAL_BUCKETS)]
+        self._size = 0
+
+    def __len__(self):
+        return self._size
