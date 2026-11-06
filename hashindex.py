@@ -50,3 +50,12 @@ class HashIndex:
         bucket.pop(i)
         self._size -= 1
         return True
+    def keys(self):
+        return [entry[0] for bucket in self._buckets for entry in bucket]
+
+    def clear(self):
+        self._buckets = [[] for _ in range(_INITIAL_BUCKETS)]
+        self._size = 0
+
+    def items(self):
+        return [entry for bucket in self._buckets for entry in bucket]
