@@ -8,3 +8,5 @@ def _hash(key):
         h ^= byte
         h = (h * 16777619) & 0xFFFFFFFF
     return h
+    
+class HashIndex:
