@@ -27,4 +27,6 @@ class HashIndex:
     def get(self, key, default=None):
         bucket, i = self._find(key)
         return bucket[i][1] if i >= 0 else default
-
+        
+    def has(self, key):
+        return self._find(key)[1] >= 0
