@@ -42,3 +42,11 @@ class HashIndex:
         if self._size / len(self._buckets) > _MAX_LOAD:
             self._resize(len(self._buckets) * 2)
 
+    def delete(self, key):
+        """Remove a key. Returns True if it existed."""
+        bucket, i = self._find(key)
+        if i < 0:
+            return False
+        bucket.pop(i)
+        self._size -= 1
+        return True
