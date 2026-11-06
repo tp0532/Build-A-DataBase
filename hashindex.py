@@ -30,3 +30,15 @@ class HashIndex:
         
     def has(self, key):
         return self._find(key)[1] >= 0
+
+    def set(self, key, value):
+        """Insert or overwrite a key."""
+        bucket, i = self._find(key)
+        if i >= 0:
+            bucket[i] = (key, value)
+            return
+        bucket.append((key, value))
+        self._size += 1
+        if self._size / len(self._buckets) > _MAX_LOAD:
+            self._resize(len(self._buckets) * 2)
+
