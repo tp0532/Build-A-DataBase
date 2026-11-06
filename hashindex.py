@@ -59,3 +59,9 @@ class HashIndex:
 
     def items(self):
         return [entry for bucket in self._buckets for entry in bucket]
+
+    def _resize(self, new_count):
+        old = self.items()
+        self._buckets = [[] for _ in range(new_count)]
+        for key, value in old:
+            self._buckets[_hash(key) % new_count].append((key, value))
