@@ -161,3 +161,21 @@ class TestTransactions(StoreTestCase):
         self.run_cmd("COMMIT")
         self.reopen()
         self.assertEqual(self.run_cmd("GET a"), ["1"])
+
+    def test_abort_rolls_back(self):
+        self.run_cmd("SET a 1")
+        self.run_cmd("BEGIN")
+        self.run_cmd("SET a 2")
+        self.run_cmd("SET b 3")
+        self.run_cmd("ABORT")
+        self.assertEqual(self.run_cmd("GET a"), ["1"])
+        self.assertEqual(self.run_cmd("GET b"), ["(nil)"])
+        self.reopen()
+        self.assertEqual(self.run_cmd("GET a"), ["1"])
+        self.assertEqual(self.run_cmd("GET b"), ["(nil)"])
+
+    def test_uncommitted_lost_on_exit(self):
+        self.run_cmd("BEGIN")
+        self.run_cmd("SET a 1")
+        self.reopen()
+        self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
