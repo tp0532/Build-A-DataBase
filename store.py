@@ -193,3 +193,46 @@ class Store:
 
     def rpush(self, key, value):
         return self._push("RPUSH", key, value)
+
+    def lrange(self, key, start, stop):
+        if not self._live(key):
+            return []
+        lst = self.data.get(key)
+        if not isinstance(lst, list):
+            raise StoreError("WRONGTYPE")
+        n = len(lst)
+        if start < 0:
+            start = max(0, n + start)
+        if stop < 0:
+            stop = n + stop
+        stop = min(stop, n - 1)
+        if start > stop:
+            return []
+        return lst[start : stop + 1]
+
+    def _incr_by(self, key, delta):
+        if self._live(key):
+            raw = self.data.get(key)
+            if not isinstance(raw, str):
+                raise StoreError("WRONGTYPE")
+        else:
+            raw = "0"
+        try:
+            value = int(raw) + delta
+        except ValueError as exc:
+            raise StoreError("value is not an integer") from exc
+        keep = self.expiry.get(key)
+        self._do(["SET", key, str(value)])
+        if keep is not None:  # INCR keeps an existing TTL
+            self._do(["EXPIREAT", key, keep])
+        return str(value)
+
+    def incr(self, key):
+        return self._incr_by(key, 1)
+
+    def decr(self, key):
+        return self._incr_by(key, -1)
+
+    def flushdb(self):
+        self._do(["FLUSHDB"])
+        return OK
