@@ -1,7 +1,6 @@
 """Custom in-memory index: a hash table with separate chaining.
 
-The assignment forbids the language's built-in dict/map types, so this
-module implements its own. Keys are strings; values may be any object.
+Keys are strings; values may be any object.
 """
 
 _INITIAL_BUCKETS = 16
