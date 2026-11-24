@@ -147,3 +147,8 @@ class TestStructures(StoreTestCase):
         self.assertEqual(self.run_cmd("LRANGE l 0 -1"), ["z", "a", "b"])
         self.assertEqual(self.run_cmd("LRANGE l 1 1"), ["a"])
         self.assertEqual(self.run_cmd("LRANGE l 5 9"), [])
+
+    def test_wrong_type(self):
+        self.run_cmd("RPUSH l a")
+        with self.assertRaises(Exception):
+            self.run_cmd("GET l")
