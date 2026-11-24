@@ -130,3 +130,20 @@ class TestTTL(StoreTestCase):
         self.run_cmd("EXPIRE a 10")
         self.run_cmd("SET a 2")
         self.assertEqual(self.run_cmd("TTL a"), ["-1"])
+
+class TestStructures(StoreTestCase):
+    def test_hashes(self):
+        self.assertEqual(self.run_cmd("HSET h f v"), ["1"])
+        self.assertEqual(self.run_cmd("HSET h f v2"), ["0"])
+        self.run_cmd("HSET h g w")
+        self.assertEqual(self.run_cmd("HGET h f"), ["v2"])
+        self.assertEqual(self.run_cmd("HGET h zz"), ["(nil)"])
+        self.assertEqual(self.run_cmd("HGETALL h"), ["f", "v2", "g", "w"])
+
+    def test_lists(self):
+        self.assertEqual(self.run_cmd("RPUSH l a"), ["1"])
+        self.run_cmd("RPUSH l b")
+        self.assertEqual(self.run_cmd("LPUSH l z"), ["3"])
+        self.assertEqual(self.run_cmd("LRANGE l 0 -1"), ["z", "a", "b"])
+        self.assertEqual(self.run_cmd("LRANGE l 1 1"), ["a"])
+        self.assertEqual(self.run_cmd("LRANGE l 5 9"), [])
