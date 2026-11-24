@@ -46,3 +46,14 @@ class Store:
             self._tx_log.append(record)
             return
         self._write_records([record])
+
+    def _write_records(self, records):
+        for record in records:
+            self._log_file.write(json.dumps(record) + "\n")
+        self._log_file.flush()
+        os.fsync(self._log_file.fileno())
+
+    def close(self):
+        if self._tx_log is not None:
+            self.abort()
+        self._log_file.close()
