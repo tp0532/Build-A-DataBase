@@ -91,3 +91,12 @@ class Store:
         """Apply a record to memory and log it."""
         self._apply(record)
         self._persist(record)
+    def _purge_if_expired(self, key):
+        """Lazily delete a key whose TTL has passed. Logs the deletion."""
+        deadline = self.expiry.get(key)
+        if deadline is not None and self._clock() >= deadline:
+            self._do(["DEL", key])
+
+    def _live(self, key):
+        self._purge_if_expired(key)
+        return self.data.has(key)
