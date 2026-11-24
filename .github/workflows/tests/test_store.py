@@ -54,3 +54,19 @@ class TestHashIndex(unittest.TestCase):
             h.set("k%d" % i, i)
         self.assertEqual(len(h), 1000)
         self.assertEqual(h.get("k777"), 777)
+
+class TestBasics(StoreTestCase):
+    def test_data_file_created(self):
+        self.assertTrue(os.path.exists(self.path))
+
+    def test_set_get_overwrite(self):
+        self.assertEqual(self.run_cmd("SET a 1"), ["OK"])
+        self.run_cmd("SET a 2")
+        self.assertEqual(self.run_cmd("GET a"), ["2"])
+
+    def test_value_with_spaces(self):
+        self.run_cmd("SET a hello big world")
+        self.assertEqual(self.run_cmd("GET a"), ["hello big world"])
+
+    def test_nonexistent_get(self):
+        self.assertEqual(self.run_cmd("GET nope"), ["(nil)"])
