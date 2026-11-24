@@ -37,3 +37,20 @@ class StoreTestCase(unittest.TestCase):
 
     def run_cmd(self, line):
         return execute(self.s, line)
+
+class TestHashIndex(unittest.TestCase):
+    def test_set_get_overwrite_delete(self):
+        h = HashIndex()
+        h.set("a", 1)
+        h.set("a", 2)
+        self.assertEqual(h.get("a"), 2)
+        self.assertEqual(len(h), 1)
+        self.assertTrue(h.delete("a"))
+        self.assertFalse(h.delete("a"))
+
+    def test_resize_keeps_all_keys(self):
+        h = HashIndex()
+        for i in range(1000):
+            h.set("k%d" % i, i)
+        self.assertEqual(len(h), 1000)
+        self.assertEqual(h.get("k777"), 777)
