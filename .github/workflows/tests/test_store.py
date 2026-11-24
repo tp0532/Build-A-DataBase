@@ -115,3 +115,18 @@ class TestTTL(StoreTestCase):
         self.clock.now += 7
         self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
         self.assertEqual(self.run_cmd("TTL a"), ["-2"])
+
+    def test_expire_missing_key(self):
+        self.assertEqual(self.run_cmd("EXPIRE nope 5"), ["0"])
+
+    def test_ttl_survives_restart(self):
+        self.run_cmd("SET a 1")
+        self.run_cmd("EXPIRE a 10")
+        self.reopen()
+        self.assertEqual(self.run_cmd("TTL a"), ["10"])
+
+    def test_set_clears_ttl(self):
+        self.run_cmd("SET a 1")
+        self.run_cmd("EXPIRE a 10")
+        self.run_cmd("SET a 2")
+        self.assertEqual(self.run_cmd("TTL a"), ["-1"])
