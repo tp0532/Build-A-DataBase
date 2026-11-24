@@ -57,3 +57,37 @@ class Store:
         if self._tx_log is not None:
             self.abort()
         self._log_file.close()
+
+    def _apply(self, rec):
+        op = rec[0]
+        if op == "SET":
+            self.data.set(rec[1], rec[2])
+            self.expiry.delete(rec[1])
+        elif op == "DEL":
+            self.data.delete(rec[1])
+            self.expiry.delete(rec[1])
+        elif op == "EXPIREAT":
+            self.expiry.set(rec[1], rec[2])
+        elif op == "HSET":
+            h = self.data.get(rec[1])
+            if not isinstance(h, HashIndex):
+                h = HashIndex()
+                self.data.set(rec[1], h)
+            h.set(rec[2], rec[3])
+        elif op in ("LPUSH", "RPUSH"):
+            lst = self.data.get(rec[1])
+            if not isinstance(lst, list):
+                lst = []
+                self.data.set(rec[1], lst)
+            if op == "LPUSH":
+                lst.insert(0, rec[2])
+            else:
+                lst.append(rec[2])
+        elif op == "FLUSHDB":
+            self.data.clear()
+            self.expiry.clear()
+
+    def _do(self, record):
+        """Apply a record to memory and log it."""
+        self._apply(record)
+        self._persist(record)
