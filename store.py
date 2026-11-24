@@ -153,3 +153,30 @@ class Store:
         keys = [k for k in self.data.keys() if self._live(k)]
         keys = sorted(k for k in keys if start <= k <= end)
         return keys
+    def hset(self, name, field, value):
+        self._purge_if_expired(name)
+        existing = self.data.get(name)
+        if existing is not None and not isinstance(existing, HashIndex):
+            raise StoreError("WRONGTYPE")
+        is_new = not (isinstance(existing, HashIndex) and existing.has(field))
+        self._do(["HSET", name, field, value])
+        return "1" if is_new else "0"
+
+    def hget(self, name, field):
+        if not self._live(name):
+            return NIL
+        h = self.data.get(name)
+        if not isinstance(h, HashIndex):
+            raise StoreError("WRONGTYPE")
+        return h.get(field, NIL)
+
+    def hgetall(self, name):
+        if not self._live(name):
+            return []
+        h = self.data.get(name)
+        if not isinstance(h, HashIndex):
+            raise StoreError("WRONGTYPE")
+        out = []
+        for field, value in sorted(h.items()):
+            out.extend([field, value])
+        return out
