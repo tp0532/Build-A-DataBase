@@ -1,5 +1,12 @@
+"""Custom in-memory index: a hash table with separate chaining.
+
+The assignment forbids the language's built-in dict/map types, so this
+module implements its own. Keys are strings; values may be any object.
+"""
+
 _INITIAL_BUCKETS = 16
 _MAX_LOAD = 0.75
+
 
 def _hash(key):
     """FNV-1a 32-bit hash of a string."""
@@ -8,14 +15,18 @@ def _hash(key):
         h ^= byte
         h = (h * 16777619) & 0xFFFFFFFF
     return h
-    
+
+
 class HashIndex:
+    """Hash table mapping str -> object (last write wins)."""
+
     def __init__(self):
         self._buckets = [[] for _ in range(_INITIAL_BUCKETS)]
         self._size = 0
 
     def __len__(self):
         return self._size
+
     def _find(self, key):
         """Return (bucket, position) where position is -1 if absent."""
         bucket = self._buckets[_hash(key) % len(self._buckets)]
@@ -27,7 +38,7 @@ class HashIndex:
     def get(self, key, default=None):
         bucket, i = self._find(key)
         return bucket[i][1] if i >= 0 else default
-        
+
     def has(self, key):
         return self._find(key)[1] >= 0
 
@@ -50,7 +61,9 @@ class HashIndex:
         bucket.pop(i)
         self._size -= 1
         return True
+
     def keys(self):
+        """Return all keys (unordered)."""
         return [entry[0] for bucket in self._buckets for entry in bucket]
 
     def clear(self):
