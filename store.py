@@ -180,3 +180,16 @@ class Store:
         for field, value in sorted(h.items()):
             out.extend([field, value])
         return out
+    def _push(self, op, key, value):
+        self._purge_if_expired(key)
+        existing = self.data.get(key)
+        if existing is not None and not isinstance(existing, list):
+            raise StoreError("WRONGTYPE")
+        self._do([op, key, value])
+        return str(len(self.data.get(key)))
+
+    def lpush(self, key, value):
+        return self._push("LPUSH", key, value)
+
+    def rpush(self, key, value):
+        return self._push("RPUSH", key, value)
