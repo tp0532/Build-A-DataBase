@@ -196,3 +196,21 @@ class TestPersistence(StoreTestCase):
         self.assertEqual(self.run_cmd("HGET h f"), ["v"])
         self.assertEqual(self.run_cmd("LRANGE l 0 -1"), ["x"])
         self.assertEqual(self.run_cmd("GET n"), ["1"])
+
+    def test_flushdb_survives_restart(self):
+        self.run_cmd("SET a 1")
+        self.run_cmd("FLUSHDB")
+        self.reopen()
+        self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
+
+    def test_torn_last_line_ignored(self):
+        self.run_cmd("SET a 1")
+        self.s.close()
+        with open(self.path, "a", encoding="utf-8") as f:
+            f.write('["SET", "b"')  # simulated crash mid-write
+        self.open()
+        self.assertEqual(self.run_cmd("GET a"), ["1"])
+
+
+if __name__ == "__main__":
+    unittest.main()
