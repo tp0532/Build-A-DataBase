@@ -236,3 +236,24 @@ class Store:
     def flushdb(self):
         self._do(["FLUSHDB"])
         return OK
+
+    def begin(self):
+        if self._tx_log is not None:
+            raise StoreError("transaction already in progress")
+        self._tx_log = []
+        self._tx_snapshot = (copy.deepcopy(self.data), copy.deepcopy(self.expiry))
+        return OK
+
+    def commit(self):
+        if self._tx_log is None:
+            raise StoreError("no transaction in progress")
+        records, self._tx_log, self._tx_snapshot = self._tx_log, None, None
+        self._write_records(records)
+        return OK
+
+    def abort(self):
+        if self._tx_log is None:
+            raise StoreError("no transaction in progress")
+        self.data, self.expiry = self._tx_snapshot
+        self._tx_log = self._tx_snapshot = None
+        return OK
