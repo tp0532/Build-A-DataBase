@@ -179,3 +179,20 @@ class TestTransactions(StoreTestCase):
         self.run_cmd("SET a 1")
         self.reopen()
         self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
+
+class TestPersistence(StoreTestCase):
+    def test_everything_survives_restart(self):
+        self.run_cmd("SET a 1")
+        self.run_cmd("SET a 2")
+        self.run_cmd("MSET b 3 c 4")
+        self.run_cmd("DEL c")
+        self.run_cmd("HSET h f v")
+        self.run_cmd("RPUSH l x")
+        self.run_cmd("INCR n")
+        self.reopen()
+        self.assertEqual(self.run_cmd("GET a"), ["2"])
+        self.assertEqual(self.run_cmd("GET b"), ["3"])
+        self.assertEqual(self.run_cmd("EXISTS c"), ["0"])
+        self.assertEqual(self.run_cmd("HGET h f"), ["v"])
+        self.assertEqual(self.run_cmd("LRANGE l 0 -1"), ["x"])
+        self.assertEqual(self.run_cmd("GET n"), ["1"])
