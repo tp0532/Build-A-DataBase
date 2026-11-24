@@ -85,3 +85,17 @@ class TestBasics(StoreTestCase):
     def test_range(self):
         self.run_cmd("MSET a 1 b 2 c 3 d 4")
         self.assertEqual(self.run_cmd("RANGE b c"), ["b", "c"])
+
+    def test_incr_decr(self):
+        self.assertEqual(self.run_cmd("INCR n"), ["1"])
+        self.assertEqual(self.run_cmd("INCR n"), ["2"])
+        self.assertEqual(self.run_cmd("DECR n"), ["1"])
+        self.run_cmd("SET s abc")
+        with self.assertRaises(Exception):
+            self.run_cmd("INCR s")
+
+    def test_flushdb(self):
+        self.run_cmd("MSET a 1 b 2")
+        self.run_cmd("FLUSHDB")
+        self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
+        self.assertEqual(self.run_cmd("RANGE a z"), [])
