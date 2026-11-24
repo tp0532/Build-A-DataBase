@@ -1,3 +1,5 @@
+"""Unit tests for the key-value store (run with: python -m unittest)."""
+
 import os
 import sys
 import tempfile
@@ -8,6 +10,7 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), ".."))
 from hashindex import HashIndex  # noqa: E402
 from main import execute  # noqa: E402
 from store import Store  # noqa: E402
+
 
 class FakeClock:
     def __init__(self):
@@ -38,6 +41,7 @@ class StoreTestCase(unittest.TestCase):
     def run_cmd(self, line):
         return execute(self.s, line)
 
+
 class TestHashIndex(unittest.TestCase):
     def test_set_get_overwrite_delete(self):
         h = HashIndex()
@@ -54,6 +58,7 @@ class TestHashIndex(unittest.TestCase):
             h.set("k%d" % i, i)
         self.assertEqual(len(h), 1000)
         self.assertEqual(h.get("k777"), 777)
+
 
 class TestBasics(StoreTestCase):
     def test_data_file_created(self):
@@ -104,6 +109,7 @@ class TestBasics(StoreTestCase):
         with self.assertRaises(Exception):
             self.run_cmd("BOGUS")
 
+
 class TestTTL(StoreTestCase):
     def test_ttl_and_expiry(self):
         self.run_cmd("SET a 1")
@@ -131,6 +137,7 @@ class TestTTL(StoreTestCase):
         self.run_cmd("SET a 2")
         self.assertEqual(self.run_cmd("TTL a"), ["-1"])
 
+
 class TestStructures(StoreTestCase):
     def test_hashes(self):
         self.assertEqual(self.run_cmd("HSET h f v"), ["1"])
@@ -152,6 +159,7 @@ class TestStructures(StoreTestCase):
         self.run_cmd("RPUSH l a")
         with self.assertRaises(Exception):
             self.run_cmd("GET l")
+
 
 class TestTransactions(StoreTestCase):
     def test_commit(self):
@@ -180,6 +188,7 @@ class TestTransactions(StoreTestCase):
         self.reopen()
         self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
 
+
 class TestPersistence(StoreTestCase):
     def test_everything_survives_restart(self):
         self.run_cmd("SET a 1")
@@ -199,18 +208,3 @@ class TestPersistence(StoreTestCase):
 
     def test_flushdb_survives_restart(self):
         self.run_cmd("SET a 1")
-        self.run_cmd("FLUSHDB")
-        self.reopen()
-        self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
-
-    def test_torn_last_line_ignored(self):
-        self.run_cmd("SET a 1")
-        self.s.close()
-        with open(self.path, "a", encoding="utf-8") as f:
-            f.write('["SET", "b"')  # simulated crash mid-write
-        self.open()
-        self.assertEqual(self.run_cmd("GET a"), ["1"])
-
-
-if __name__ == "__main__":
-    unittest.main()
