@@ -39,3 +39,10 @@ class Store:
                 except ValueError:
                     continue  # ignore a torn final line after a crash
                 self._apply(record)
+
+    def _persist(self, record):
+        """Append a record and force it to disk (or buffer it in a tx)."""
+        if self._tx_log is not None:
+            self._tx_log.append(record)
+            return
+        self._write_records([record])
