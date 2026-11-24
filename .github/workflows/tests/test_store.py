@@ -70,3 +70,18 @@ class TestBasics(StoreTestCase):
 
     def test_nonexistent_get(self):
         self.assertEqual(self.run_cmd("GET nope"), ["(nil)"])
+
+    def test_del_exists(self):
+        self.run_cmd("SET a 1")
+        self.assertEqual(self.run_cmd("EXISTS a"), ["1"])
+        self.assertEqual(self.run_cmd("DEL a"), ["1"])
+        self.assertEqual(self.run_cmd("EXISTS a"), ["0"])
+        self.assertEqual(self.run_cmd("DEL a"), ["0"])
+
+    def test_mset_mget(self):
+        self.run_cmd("MSET a 1 b 2")
+        self.assertEqual(self.run_cmd("MGET a b c"), ["1", "2", "(nil)"])
+
+    def test_range(self):
+        self.run_cmd("MSET a 1 b 2 c 3 d 4")
+        self.assertEqual(self.run_cmd("RANGE b c"), ["b", "c"])
