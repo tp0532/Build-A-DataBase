@@ -1,3 +1,5 @@
+"""Command-line front end: reads commands from STDIN, writes to STDOUT."""
+
 import sys
 
 from store import Store, StoreError
@@ -20,6 +22,7 @@ def _rest(line, parts, skip):
     if len(parts) <= skip:
         return ""
     return line.strip().split(None, skip)[skip]
+
 
 def execute(store, line):
     """Run one command line; return a list of output lines, or None to exit."""
@@ -96,6 +99,7 @@ def execute(store, line):
         return [store.flushdb()]
     raise StoreError("unknown command '%s'" % cmd)
 
+
 def main(path="data.db"):
     store = Store(path)
     try:
@@ -111,6 +115,7 @@ def main(path="data.db"):
             sys.stdout.flush()
     finally:
         store.close()
+
 
 if __name__ == "__main__":
     main()
