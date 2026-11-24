@@ -100,3 +100,56 @@ class Store:
     def _live(self, key):
         self._purge_if_expired(key)
         return self.data.has(key)
+    def set(self, key, value):
+        self._do(["SET", key, value])
+        return OK
+
+    def get(self, key):
+        if not self._live(key):
+            return NIL
+        value = self.data.get(key)
+        if not isinstance(value, str):
+            raise StoreError("WRONGTYPE")
+        return value
+
+    def delete(self, key):
+        existed = self._live(key)
+        if existed:
+            self._do(["DEL", key])
+        return "1" if existed else "0"
+
+    def exists(self, key):
+        return "1" if self._live(key) else "0"
+
+    def mset(self, pairs):
+        for key, value in pairs:
+            self._do(["SET", key, value])
+        return OK
+
+    def mget(self, keys):
+        out = []
+        for k in keys:
+            if self._live(k) and isinstance(self.data.get(k), str):
+                out.append(self.data.get(k))
+            else:
+                out.append(NIL)
+        return out
+
+    def expire(self, key, seconds):
+        if not self._live(key):
+            return "0"
+        self._do(["EXPIREAT", key, self._clock() + seconds])
+        return "1"
+
+    def ttl(self, key):
+        if not self._live(key):
+            return "-2"
+        deadline = self.expiry.get(key)
+        if deadline is None:
+            return "-1"
+        return str(max(0, int(round(deadline - self._clock()))))
+
+    def range(self, start, end):
+        keys = [k for k in self.data.keys() if self._live(k)]
+        keys = sorted(k for k in keys if start <= k <= end)
+        return keys
