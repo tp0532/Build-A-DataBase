@@ -111,3 +111,6 @@ def main(path="data.db"):
             sys.stdout.flush()
     finally:
         store.close()
+
+if __name__ == "__main__":
+    main()
