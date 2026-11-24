@@ -103,3 +103,15 @@ class TestBasics(StoreTestCase):
     def test_unknown_command(self):
         with self.assertRaises(Exception):
             self.run_cmd("BOGUS")
+
+class TestTTL(StoreTestCase):
+    def test_ttl_and_expiry(self):
+        self.run_cmd("SET a 1")
+        self.assertEqual(self.run_cmd("TTL a"), ["-1"])
+        self.assertEqual(self.run_cmd("EXPIRE a 10"), ["1"])
+        self.assertEqual(self.run_cmd("TTL a"), ["10"])
+        self.clock.now += 4
+        self.assertEqual(self.run_cmd("TTL a"), ["6"])
+        self.clock.now += 7
+        self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
+        self.assertEqual(self.run_cmd("TTL a"), ["-2"])
