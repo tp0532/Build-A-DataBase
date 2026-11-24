@@ -27,3 +27,15 @@ class Store:
         open(self.path, "a", encoding="utf-8").close()
         self._replay()
         self._log_file = open(self.path, "a", encoding="utf-8")
+    def _replay(self):
+        """Rebuild in-memory state by re-applying every logged record."""
+        with open(self.path, "r", encoding="utf-8") as f:
+            for line in f:
+                line = line.strip()
+                if not line:
+                    continue
+                try:
+                    record = json.loads(line)
+                except ValueError:
+                    continue  # ignore a torn final line after a crash
+                self._apply(record)
