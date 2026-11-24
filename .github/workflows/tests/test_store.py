@@ -99,3 +99,7 @@ class TestBasics(StoreTestCase):
         self.run_cmd("FLUSHDB")
         self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
         self.assertEqual(self.run_cmd("RANGE a z"), [])
+
+    def test_unknown_command(self):
+        with self.assertRaises(Exception):
+            self.run_cmd("BOGUS")
