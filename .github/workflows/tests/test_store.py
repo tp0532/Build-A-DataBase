@@ -152,3 +152,12 @@ class TestStructures(StoreTestCase):
         self.run_cmd("RPUSH l a")
         with self.assertRaises(Exception):
             self.run_cmd("GET l")
+
+class TestTransactions(StoreTestCase):
+    def test_commit(self):
+        self.run_cmd("BEGIN")
+        self.run_cmd("SET a 1")
+        self.assertEqual(self.run_cmd("GET a"), ["1"])
+        self.run_cmd("COMMIT")
+        self.reopen()
+        self.assertEqual(self.run_cmd("GET a"), ["1"])
