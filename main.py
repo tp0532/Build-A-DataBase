@@ -95,3 +95,19 @@ def execute(store, line):
     if cmd == "FLUSHDB":
         return [store.flushdb()]
     raise StoreError("unknown command '%s'" % cmd)
+
+def main(path="data.db"):
+    store = Store(path)
+    try:
+        for line in sys.stdin:
+            try:
+                out = execute(store, line)
+            except StoreError as err:
+                out = ["ERR " + str(err)]
+            if out is None:
+                break
+            for text in out:
+                print(text)
+            sys.stdout.flush()
+    finally:
+        store.close()
