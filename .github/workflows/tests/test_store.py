@@ -27,3 +27,13 @@ class StoreTestCase(unittest.TestCase):
     def tearDown(self):
         self.s.close()
         self.dir.cleanup()
+
+    def open(self):
+        self.s = Store(self.path, clock=self.clock)
+
+    def reopen(self):
+        self.s.close()
+        self.open()
+
+    def run_cmd(self, line):
+        return execute(self.s, line)
