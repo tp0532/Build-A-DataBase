@@ -63,7 +63,7 @@ def execute(store, line):
         return [store.ttl(args[0])]
     if cmd == "RANGE":
         _need(args, 2, "RANGE start end")
-        return store.range(args[0], args[1])
+        return store.range(args[0], args[1]) + ["END"]
     if cmd == "BEGIN":
         return [store.begin()]
     if cmd == "COMMIT":
@@ -89,6 +89,9 @@ def execute(store, line):
     if cmd == "LRANGE":
         _need(args, 3, "LRANGE key start stop")
         return store.lrange(args[0], _int(args[1]), _int(args[2]))
+    if cmd in ("LPOP", "RPOP"):
+        _need(args, 1, "%s key" % cmd)
+        return [store.lpop(args[0]) if cmd == "LPOP" else store.rpop(args[0])]
     if cmd == "INCR":
         _need(args, 1, "INCR key")
         return [store.incr(args[0])]
