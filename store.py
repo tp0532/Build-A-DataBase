@@ -168,9 +168,14 @@ class Store:
         return str(max(0, int(round(deadline - self._clock()))))
 
     def range(self, start, end):
+        """Live keys with start <= key <= end, sorted.
+
+        An empty bound ("" or '') means unbounded on that side.
+        """
+        start = "" if start in ('""', "''") else start
+        end = "" if end in ('""', "''") else end
         keys = [k for k in self.data.keys() if self._live(k)]
-        keys = sorted(k for k in keys if start <= k <= end)
-        return keys
+        return sorted(k for k in keys if k >= start and (end == "" or k <= end))
 
     def hset(self, name, field, value):
         self._purge_if_expired(name)
