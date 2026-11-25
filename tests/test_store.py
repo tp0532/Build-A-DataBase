@@ -74,7 +74,7 @@ class TestBasics(StoreTestCase):
         self.assertEqual(self.run_cmd("GET a"), ["hello big world"])
 
     def test_nonexistent_get(self):
-        self.assertEqual(self.run_cmd("GET nope"), ["(nil)"])
+        self.assertEqual(self.run_cmd("GET nope"), [""])
 
     def test_del_exists(self):
         self.run_cmd("SET a 1")
@@ -85,7 +85,7 @@ class TestBasics(StoreTestCase):
 
     def test_mset_mget(self):
         self.run_cmd("MSET a 1 b 2")
-        self.assertEqual(self.run_cmd("MGET a b c"), ["1", "2", "(nil)"])
+        self.assertEqual(self.run_cmd("MGET a b c"), ["1", "2", ""])
 
     def test_range(self):
         self.run_cmd("MSET a 1 b 2 c 3 d 4")
@@ -102,7 +102,7 @@ class TestBasics(StoreTestCase):
     def test_flushdb(self):
         self.run_cmd("MSET a 1 b 2")
         self.run_cmd("FLUSHDB")
-        self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
+        self.assertEqual(self.run_cmd("GET a"), [""])
         self.assertEqual(self.run_cmd("RANGE a z"), [])
 
     def test_unknown_command(self):
@@ -119,7 +119,7 @@ class TestTTL(StoreTestCase):
         self.clock.now += 4
         self.assertEqual(self.run_cmd("TTL a"), ["6"])
         self.clock.now += 7
-        self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
+        self.assertEqual(self.run_cmd("GET a"), [""])
         self.assertEqual(self.run_cmd("TTL a"), ["-2"])
 
     def test_expire_missing_key(self):
@@ -144,7 +144,7 @@ class TestStructures(StoreTestCase):
         self.assertEqual(self.run_cmd("HSET h f v2"), ["0"])
         self.run_cmd("HSET h g w")
         self.assertEqual(self.run_cmd("HGET h f"), ["v2"])
-        self.assertEqual(self.run_cmd("HGET h zz"), ["(nil)"])
+        self.assertEqual(self.run_cmd("HGET h zz"), [""])
         self.assertEqual(self.run_cmd("HGETALL h"), ["f", "v2", "g", "w"])
 
     def test_lists(self):
@@ -177,16 +177,16 @@ class TestTransactions(StoreTestCase):
         self.run_cmd("SET b 3")
         self.run_cmd("ABORT")
         self.assertEqual(self.run_cmd("GET a"), ["1"])
-        self.assertEqual(self.run_cmd("GET b"), ["(nil)"])
+        self.assertEqual(self.run_cmd("GET b"), [""])
         self.reopen()
         self.assertEqual(self.run_cmd("GET a"), ["1"])
-        self.assertEqual(self.run_cmd("GET b"), ["(nil)"])
+        self.assertEqual(self.run_cmd("GET b"), [""])
 
     def test_uncommitted_lost_on_exit(self):
         self.run_cmd("BEGIN")
         self.run_cmd("SET a 1")
         self.reopen()
-        self.assertEqual(self.run_cmd("GET a"), ["(nil)"])
+        self.assertEqual(self.run_cmd("GET a"), [""])
 
 
 class TestPersistence(StoreTestCase):
