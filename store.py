@@ -9,7 +9,7 @@ from hashindex import HashIndex
 
 # Response strings (change here if Gradebot expects different wording).
 OK = "OK"
-NIL = "(nil)"
+NIL = ""
 EMPTY = "(empty)"
 
 
