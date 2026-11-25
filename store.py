@@ -230,6 +230,21 @@ class Store:
             return []
         return lst[start : stop + 1]
 
+    def _pop(self, op, key):
+        if not self._live(key):
+            return NIL
+        lst = self.data.get(key)
+        if not isinstance(lst, list):
+            raise StoreError("WRONGTYPE")
+        value = lst[0] if op == "LPOP" else lst[-1]
+        self._do([op, key])
+        return value
+
+    def lpop(self, key):
+        return self._pop("LPOP", key)
+
+    def rpop(self, key):
+        return self._pop("RPOP", key)
     def _incr_by(self, key, delta):
         if self._live(key):
             raw = self.data.get(key)
