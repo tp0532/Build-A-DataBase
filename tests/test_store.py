@@ -90,6 +90,8 @@ class TestBasics(StoreTestCase):
     def test_range(self):
         self.run_cmd("MSET a 1 b 2 c 3 d 4")
         self.assertEqual(self.run_cmd("RANGE b c"), ["b", "c", "END"])
+        # An empty end bound means "to the end".
+        self.assertEqual(self.run_cmd('RANGE b ""'), ["b", "c", "d", "END"])
 
     def test_incr_decr(self):
         self.assertEqual(self.run_cmd("INCR n"), ["1"])
