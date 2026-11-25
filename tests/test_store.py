@@ -89,7 +89,7 @@ class TestBasics(StoreTestCase):
 
     def test_range(self):
         self.run_cmd("MSET a 1 b 2 c 3 d 4")
-        self.assertEqual(self.run_cmd("RANGE b c"), ["b", "c"])
+        self.assertEqual(self.run_cmd("RANGE b c"), ["b", "c", "END"])
 
     def test_incr_decr(self):
         self.assertEqual(self.run_cmd("INCR n"), ["1"])
@@ -103,7 +103,7 @@ class TestBasics(StoreTestCase):
         self.run_cmd("MSET a 1 b 2")
         self.run_cmd("FLUSHDB")
         self.assertEqual(self.run_cmd("GET a"), [""])
-        self.assertEqual(self.run_cmd("RANGE a z"), [])
+        self.assertEqual(self.run_cmd("RANGE a z"), ["END"])
 
     def test_unknown_command(self):
         with self.assertRaises(Exception):
@@ -154,7 +154,17 @@ class TestStructures(StoreTestCase):
         self.assertEqual(self.run_cmd("LRANGE l 0 -1"), ["z", "a", "b"])
         self.assertEqual(self.run_cmd("LRANGE l 1 1"), ["a"])
         self.assertEqual(self.run_cmd("LRANGE l 5 9"), [])
-
+    def test_lpop_rpop(self):
+        self.run_cmd("RPUSH l a")
+        self.run_cmd("RPUSH l b")
+        self.run_cmd("RPUSH l c")
+        self.assertEqual(self.run_cmd("LPOP l"), ["a"])
+        self.assertEqual(self.run_cmd("RPOP l"), ["c"])
+        self.assertEqual(self.run_cmd("LRANGE l 0 -1"), ["b"])
+        self.reopen()
+        self.assertEqual(self.run_cmd("LRANGE l 0 -1"), ["b"])
+        self.assertEqual(self.run_cmd("LPOP l"), ["b"])
+        self.assertEqual(self.run_cmd("LPOP l"), [""])
     def test_wrong_type(self):
         self.run_cmd("RPUSH l a")
         with self.assertRaises(Exception):
