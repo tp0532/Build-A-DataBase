@@ -245,7 +245,7 @@ class Store:
 
     def rpop(self, key):
         return self._pop("RPOP", key)
-        
+ 
     def _incr_by(self, key, delta):
         if self._live(key):
             raw = self.data.get(key)
