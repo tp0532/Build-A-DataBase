@@ -90,6 +90,13 @@ class Store:
                 lst.insert(0, rec[2])
             else:
                 lst.append(rec[2])
+        elif op in ("LPOP", "RPOP"):
+            lst = self.data.get(rec[1])
+            if isinstance(lst, list) and lst:
+                lst.pop(0 if op == "LPOP" else -1)
+                if not lst:  # an emptied list disappears, like Redis
+                    self.data.delete(rec[1])
+                    self.expiry.delete(rec[1])
         elif op == "FLUSHDB":
             self.data.clear()
             self.expiry.clear()
